@@ -1,0 +1,70 @@
+import calendar
+import speech_recognition as sr
+import pyttsx3
+import pywhatkit
+import pyjokes
+import wikipedia
+import datetime
+import os
+
+
+listener = sr.Recognizer()
+engine = pyttsx3.init()
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[1].id)
+engine.say("Hi I'm Alexa")
+
+
+def talk(text):
+    engine.say(text)
+    engine.runAndWait()
+
+
+def take_command():
+    with sr.Microphone() as source:
+        print('listening...')
+        voice = listener.listen(source)
+        command = listener.recognize_google(voice)
+        command = command.lower()
+        print(command)
+        if 'alexa' in command:
+            command = command.replace('alexa', '')
+            print(command)
+        return command
+
+
+def run_alexa():
+    command = take_command()
+    print(command)
+    if 'play' in command:
+        song = command.replace('play', '')
+        talk('playing ' + song)
+        pywhatkit.playonyt(song)
+    elif 'joke' in command:
+        talk(pyjokes.get_joke())
+    elif 'who is' in command:
+        name_cmd = command.replace('who is', '')
+        talk(wikipedia.summary(name_cmd, 1))
+    elif 'time' in command:
+        now = datetime.datetime.now().strftime('%I:%M %p')
+        talk('The current time is ' + now)
+    elif 'day' in command:
+        today = datetime.date.today()
+        talk('Today is ' + calendar.day_name[today.weekday()])
+    elif 'open' in command:
+        open_cmd = command.replace('open', '')
+        talk('Opening ' + open_cmd)
+        os.system(open_cmd)
+    elif 'google' in command:
+        search_txt = command.replace('google', '')
+        talk('Searching ' + search_txt)
+        pywhatkit.search(search_txt)
+    elif 'weather' in command:
+        pass
+    else:
+        talk('Please say the command again.')
+
+
+while True:
+    talk("What can I do for you? ")
+    run_alexa()
